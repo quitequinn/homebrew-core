@@ -19,32 +19,15 @@ class Plutobook < Formula
   uses_from_macos "curl"
   uses_from_macos "expat"
 
-  on_macos do
-    depends_on "llvm" if DevelopmentTools.clang_build_version <= 1500
-  end
-
   on_ventura do
     depends_on "llvm"
-  end
-
-  fails_with :clang do
-    build 1500
-    cause "Requires C++20 support"
+    fails_with :clang
   end
 
   def install
-    if OS.mac? && (MacOS.version == :ventura || DevelopmentTools.clang_build_version <= 1500)
-      # Use Homebrew LLVM toolchain and its libc++ consistently to avoid ABI mismatches
+    if OS.mac? && MacOS.version == :ventura
       ENV.llvm_clang
-      llvm = Formula["llvm"]
-      # Ensure we pick up LLVM's libc++ headers when using its toolchain
-      ENV.append "CPPFLAGS", "-I#{llvm.opt_include}/c++/v1"
-      # Link against LLVM's libc++, libc++abi and libunwind, and embed rpaths so the loader can find them
-      ENV.append "LDFLAGS", "-L#{llvm.opt_lib}/c++ -L#{llvm.opt_lib} -L#{llvm.opt_lib}/unwind"
-      ENV.append "LDFLAGS", "-Wl,-rpath,#{llvm.opt_lib}/c++ -Wl,-rpath,#{llvm.opt_lib}"
       ENV.append "LDFLAGS", "-lc++ -lc++abi -lunwind"
-      # Use libc++ (required by LLVM toolchain on macOS)
-      ENV.append "CXXFLAGS", "-stdlib=libc++"
     end
 
     system "meson", "setup", "build", *std_meson_args
