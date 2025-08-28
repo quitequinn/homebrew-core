@@ -25,10 +25,16 @@ class Arrayfire < Formula
   depends_on "openblas"
   depends_on "spdlog"
 
+  uses_from_macos "llvm" => :build
+
   on_linux do
     depends_on "opencl-headers" => :build
     depends_on "opencl-icd-loader"
     depends_on "pocl"
+  end
+
+  fails_with :gcc do
+    cause "GCC without CXX_EXTENSIONS causes OpenCL headers to not expose cl_image_desc.mem_object"
   end
 
   # Backport fix for missing include for climits header
