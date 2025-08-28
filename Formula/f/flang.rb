@@ -20,6 +20,7 @@ class Flang < Formula
   end
 
   depends_on "cmake" => :build
+  depends_on "ninja" => :build
   depends_on "llvm"
 
   # Keep broken symlink if `llvm` has been unlinked on Linux.
@@ -37,6 +38,7 @@ class Flang < Formula
     relative_resource_dir = resource_dir.relative_path_from(llvm.prefix.realpath)
 
     common_args = %W[
+      -GNinja
       -DBUILD_SHARED_LIBS=ON
       -DLLVM_DIR=#{llvm.opt_lib}/cmake/llvm
       -DLLVM_ENABLE_FATLTO=ON
